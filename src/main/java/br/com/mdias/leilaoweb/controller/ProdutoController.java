@@ -25,6 +25,10 @@ public class ProdutoController {
 
 	@PostMapping("/salvar")
 	public ResponseEntity<?> salvar(@Valid @RequestBody Produto produto) {
+		
+		if (produto.getId() < 0)
+			throw new IllegalArgumentException("Id do produto inválido");
+		
 		ResponseEntity<Object> response = new ResponseEntity<Object>(HttpStatus.OK);
 		return response;
 	}

@@ -8,7 +8,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -17,11 +21,26 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import br.com.mdias.leilaoweb.config.SecurityConfig;
 import br.com.mdias.leilaoweb.model.Produto;
 
+/**
+ * Handling Standard Spring MVC Exceptions
+ * https://docs.spring.io/spring/docs/3.2.x/spring-framework-reference/html/mvc.html#mvc-ann-rest-spring-mvc-exceptions
+ * 
+ * https://www.baeldung.com/exception-handling-for-rest-with-spring
+ * https://www.baeldung.com/global-error-handler-in-a-spring-rest-api
+ */
 @RunWith(SpringRunner.class)
-@WebMvcTest(ProdutoController.class)
-@WithMockUser("rponte")
+@WebMvcTest(value=ProdutoController.class, secure=true)
+@Import(SecurityConfig.class)
+//@WithMockUser("rponte")
+
+/**
+ * Teste levantando todo o contexto do Spring (moda antiga)
+ */
+//@SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT)
+//@AutoConfigureMockMvc
 public class ProdutoControllerTest {
 	
 	@Autowired
@@ -37,7 +56,8 @@ public class ProdutoControllerTest {
 		mvc.perform(get("/produtos/2020")
 					.contentType(MediaType.APPLICATION_FORM_URLENCODED))
 			.andDo(print())
-			.andExpect(status().isOk()) // FIXME: falta finalizar (dataset e response)
+			.andExpect(status().isOk())
+			// TODO: validar json de resposta
 			;
 	}
 	
@@ -68,7 +88,24 @@ public class ProdutoControllerTest {
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(toJson(invalido)))
 			.andDo(print())
-			.andExpect(status().isBadRequest()) // FIXME: falta finalizar (dataset e response)
+			.andExpect(status().isBadRequest())
+			// TODO: validar json de resposta
+			;
+	}
+	
+	@Test
+	public void deveRetornarRespostaDeErro_paraExcecaoDeLogicaDeNegocio() throws Exception {
+		
+		// cenário
+		Produto invalido = new Produto(-1, "Geladeira", 780.0);
+		
+		// ação e validação
+		mvc.perform(post("/produtos/salvar")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(toJson(invalido)))
+			.andDo(print())
+			.andExpect(status().isBadRequest())
+			// TODO: validar json de resposta
 			;
 	}
 	
