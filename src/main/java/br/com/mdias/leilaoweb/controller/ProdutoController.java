@@ -45,7 +45,7 @@ public class ProdutoController {
 	public JsonResult lista() {
 		
 		Produto ipad = new Produto(991, "iPad Retina Display", 4560.99);
-		Produto iphone = new Produto(992, "iPhone 8 Plus", 4400.90);
+		Produto iphone = new Produto(992, "iPhone 8 Plus", 4400.91);
 		
 		List<Produto> produtos = Arrays.asList(ipad, iphone);
 		

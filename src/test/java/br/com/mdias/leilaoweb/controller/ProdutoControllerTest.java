@@ -1,5 +1,6 @@
 package br.com.mdias.leilaoweb.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -7,6 +8,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -75,9 +78,8 @@ public class ProdutoControllerTest {
 			;
 		
 		Produto ipad = payloadExtractor.as(Produto.class);
-		assertEquals("id", 2020, ipad.getId().intValue());
-		assertEquals("nome", "iPad Retina Display", ipad.getNome());
-		assertEquals("preco", 4560.99, ipad.getPreco(), 0000.1);
+		assertThat(ipad)
+			.isEqualToComparingFieldByField(new Produto(2020, "iPad Retina Display", 4560.99));
 	}
 	
 	@Test
@@ -92,7 +94,18 @@ public class ProdutoControllerTest {
 			.andExpect(jsonPath("data").isNotEmpty())
 			.andExpect(jsonPath("message").isEmpty())
 			.andExpect(jsonPath("code").isEmpty())
+			.andDo(payloadExtractor)
 			;
+		
+		List<Produto> produtos = payloadExtractor.asListOf(Produto.class);
+		assertEquals("total de produtos", 2, produtos.size());
+		
+		Produto ipad = new Produto(991, "iPad Retina Display", 4560.99);
+		Produto iphone = new Produto(992, "iPhone 8 Plus", 4400.91);
+		
+		assertThat(produtos)
+			.usingFieldByFieldElementComparator()
+			.containsExactly(ipad, iphone);
 	}
 	
 	@Test
