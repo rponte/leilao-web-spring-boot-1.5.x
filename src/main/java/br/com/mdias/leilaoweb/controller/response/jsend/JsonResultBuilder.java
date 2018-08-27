@@ -1,24 +1,28 @@
 package br.com.mdias.leilaoweb.controller.response.jsend;
 
+/**
+ * Builder para criar instância de <code>JsonResult</code>. Recomenda-se
+ * favorecer o uso da classe <code>Json</code>.
+ */
 public class JsonResultBuilder {
 	
 	private JsonResult jsonResult;
 	
 	public JsonResultBuilder success() {
 		this.jsonResult = new JsonResult();
-		this.jsonResult.setStatus(JsonResult.Status.SUCCESS);
+		this.jsonResult.setStatus(Status.SUCCESS);
 		return this;
 	}
 
 	public JsonResultBuilder error() {
 		this.jsonResult = new JsonResult();
-		this.jsonResult.setStatus(JsonResult.Status.ERROR);
+		this.jsonResult.setStatus(Status.ERROR);
 		return this;
 	}
 	
 	public JsonResultBuilder fail() {
 		this.jsonResult = new JsonResult();
-		this.jsonResult.setStatus(JsonResult.Status.FAIL);
+		this.jsonResult.setStatus(Status.FAIL);
 		return this;
 	}
 

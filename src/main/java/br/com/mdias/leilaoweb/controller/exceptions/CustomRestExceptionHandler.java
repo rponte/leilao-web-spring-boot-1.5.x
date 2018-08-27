@@ -1,0 +1,103 @@
+package br.com.mdias.leilaoweb.controller.exceptions;
+
+import java.util.List;
+import java.util.Locale;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+import br.com.mdias.leilaoweb.controller.response.errors.validation.Errors;
+import br.com.mdias.leilaoweb.controller.response.jsend.Json;
+import br.com.mdias.leilaoweb.controller.response.jsend.JsonResult;
+
+/**
+ * Exception Handler responsável por capturar as exceções lançadas pelo
+ * Spring-MVC e as exceções não tratadas nos controllers, e tranformá-las em um
+ * <code>JsonResult</code>.
+ * 
+ * <p> Para mais detalhes, https://www.baeldung.com/global-error-handler-in-a-spring-rest-api
+ */
+@ControllerAdvice
+public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
+
+	@Autowired
+	private MessageSource messageSource;
+	
+	/**
+	 * Catches and handles all type of logic that deals with all other exceptions
+	 * that don’t have specific handlers
+	 */
+	@ExceptionHandler({ Exception.class })
+	public ResponseEntity<Object> handleAll(Exception ex, WebRequest request) {
+		
+	    JsonResult json = Json.error()
+						      .withMessage(ex.getLocalizedMessage())
+						      .build();
+	    
+	    HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+		HttpHeaders headers = new HttpHeaders();
+		
+		return handleExceptionInternal(ex, json, headers, status, request);
+	}
+	
+	@Override
+	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
+			HttpHeaders headers, HttpStatus status, WebRequest request) {
+		
+		Errors errors = new Errors();
+		Locale locale = request.getLocale();
+		
+		BindingResult result = ex.getBindingResult();
+		List<FieldError> fieldErrors = result.getFieldErrors();
+		for (FieldError fieldError : fieldErrors) {
+			String field = fieldError.getField();
+			String message = messageSource.getMessage(fieldError, locale);
+			errors
+				.with(field, message);
+				;
+		}
+		
+		JsonResult jsonResult = Json.fail()
+								    .withMessage("Erro de validação")
+								    .withData(errors)
+								    .build();
+		
+		return handleExceptionInternal(ex, jsonResult, headers, status, request);
+	}
+	
+	@Override
+	protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers,
+			HttpStatus status, WebRequest request) {
+		
+		if (body instanceof JsonResult) {
+			ResponseEntity<Object> entity = super.handleExceptionInternal(ex, body, headers, status, request);
+			return entity;
+		}
+		
+		if (HttpStatus.BAD_REQUEST.equals(status)) {
+			body = Json.fail()
+				    .withMessage(ex.getLocalizedMessage())
+				    .withData(body)
+				    .build();
+			
+			return super.handleExceptionInternal(ex, body, headers, status, request);
+		}
+		
+		body = Json.error()
+			    .withMessage(ex.getLocalizedMessage())
+			    .withData(body)
+			    .build();
+		
+		return super.handleExceptionInternal(ex, body, headers, status, request);
+	}
+}

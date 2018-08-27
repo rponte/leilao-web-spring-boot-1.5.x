@@ -10,8 +10,12 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
 import br.com.mdias.leilaoweb.controller.response.jsend.JsonResult;
-import br.com.mdias.leilaoweb.controller.response.jsend.JsonResult.Status;
+import br.com.mdias.leilaoweb.controller.response.jsend.Status;
 
+/**
+ * Interceptor responsável por setar o Http Status da requisição de acordo com o
+ * status do <code>JsonResult</code> retornado pelo controller
+ */
 @ControllerAdvice
 public class JSendResponseBodyAdvice implements ResponseBodyAdvice<JsonResult> {
 
@@ -34,14 +38,7 @@ public class JSendResponseBodyAdvice implements ResponseBodyAdvice<JsonResult> {
 	 */
 	private HttpStatus statusFor(JsonResult json) {
 		Status jsendStatus = json.getStatus();
-		switch (jsendStatus) {
-			case ERROR:
-				return HttpStatus.INTERNAL_SERVER_ERROR; // 500 - Internal Server Error
-			case FAIL:
-				return HttpStatus.BAD_REQUEST; // 400 - Bad Request
-			default:
-				return HttpStatus.OK; // 200 - OK
-		}
+		return HttpStatus.valueOf(jsendStatus.getHttpStatusCode());
 	}
 
 }

@@ -21,6 +21,7 @@ import br.com.mdias.leilaoweb.controller.response.errors.validation.Errors;
 import br.com.mdias.leilaoweb.controller.response.jsend.Json;
 import br.com.mdias.leilaoweb.controller.response.jsend.JsonResult;
 import br.com.mdias.leilaoweb.model.Produto;
+import br.com.mdias.leilaoweb.model.ProdutoInvalidoException;
 
 @RestController
 @RequestMapping(value = "/produtos", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -67,6 +68,29 @@ public class ProdutoController {
 			return Json.error()
 					   .withMessage("Produto já existente no sistema")
 					   .build();
+		}
+		
+		// logica de negocio com mensagem e payload
+		if (substiuido(produto)) {
+			return Json.error()
+					   .withMessage("Produto substituido por nova edição", 7001)
+					   .withData(new Produto(-70, produto.getNome(), 999.80))
+					   .build();
+		}
+		
+		// sucesso
+		return Json.success()
+				   .withData(produto)
+				   .withMessage("Produto salvo com sucesso!")
+				   .build();
+	}
+	
+	@PostMapping("/salvar-smart")
+	public JsonResult salvar(@Valid @RequestBody Produto produto) {
+
+		// logica de negocio com mensagem
+		if (existe(produto)) {
+			throw new ProdutoInvalidoException("Produto já existente no sistema");
 		}
 		
 		// logica de negocio com mensagem e payload

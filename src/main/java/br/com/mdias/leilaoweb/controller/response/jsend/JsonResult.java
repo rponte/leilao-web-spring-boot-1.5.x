@@ -11,22 +11,6 @@ public class JsonResult {
 	private String message;
 	private Integer code;
 	
-	public static enum Status {
-		
-		/**
-		 * All went well, and (usually) some data was returned
-		 */
-		SUCCESS,
-		/**
-		 * There was a problem with the data submitted, or some pre-condition of the API call wasn't satisfied
-		 */
-		FAIL,
-		/**
-		 * An error occurred in processing the request, i.e. an exception was thrown
-		 */
-		ERROR
-	}
-
 	public Object getData() {
 		return data;
 	}

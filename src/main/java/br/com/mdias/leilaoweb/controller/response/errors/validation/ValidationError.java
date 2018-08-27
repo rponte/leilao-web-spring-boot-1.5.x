@@ -3,6 +3,9 @@ package br.com.mdias.leilaoweb.controller.response.errors.validation;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * Representa um erro de validação de um determinado campo da entidade ou formulario
+ */
 public class ValidationError {
 
 	private String field;

@@ -1,5 +1,9 @@
 package br.com.mdias.leilaoweb.controller.response.jsend;
 
+/**
+ * Classe utilitária para simplificar a vida do desenvolvedor na hora de criar
+ * uma instância de <code>JsonResult</code>
+ */
 public class Json {
 
 	public static JsonResultBuilder success() {
