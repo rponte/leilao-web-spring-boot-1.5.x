@@ -1,5 +1,6 @@
 package br.com.mdias.leilaoweb.controller;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -37,6 +38,19 @@ public class ProdutoController {
 		
 		return Json.success()
 				   .withData(ipad)
+				   .build();
+	}
+	
+	@GetMapping("/lista-todos")
+	public JsonResult lista() {
+		
+		Produto ipad = new Produto(991, "iPad Retina Display", 4560.99);
+		Produto iphone = new Produto(992, "iPhone 8 Plus", 4400.90);
+		
+		List<Produto> produtos = Arrays.asList(ipad, iphone);
+		
+		return Json.success()
+				   .withData(produtos)
 				   .build();
 	}
 

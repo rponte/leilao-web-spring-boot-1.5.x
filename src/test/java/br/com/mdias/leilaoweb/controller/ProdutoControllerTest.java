@@ -60,10 +60,31 @@ public class ProdutoControllerTest {
 	}
 	
 	@Test
-	public void deveRetornarRespostaDeSucesso() throws Exception {
+	public void deveRetornarRespostaDeSucesso_comUmUnicoProduto() throws Exception {
 		
 		// ação e validação
 		mvc.perform(get("/produtos/2020")
+					.contentType(MediaType.APPLICATION_FORM_URLENCODED))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("status").value(Status.SUCCESS.name()))
+			.andExpect(jsonPath("data").isNotEmpty())
+			.andExpect(jsonPath("message").isEmpty())
+			.andExpect(jsonPath("code").isEmpty())
+			.andDo(payloadExtractor)
+			;
+		
+		Produto ipad = payloadExtractor.as(Produto.class);
+		assertEquals("id", 2020, ipad.getId().intValue());
+		assertEquals("nome", "iPad Retina Display", ipad.getNome());
+		assertEquals("preco", 4560.99, ipad.getPreco(), 0000.1);
+	}
+	
+	@Test
+	public void deveRetornarRespostaDeSucesso_comMultiplosProduto() throws Exception {
+		
+		// ação e validação
+		mvc.perform(get("/produtos/lista-todos")
 					.contentType(MediaType.APPLICATION_FORM_URLENCODED))
 			.andDo(print())
 			.andExpect(status().isOk())
