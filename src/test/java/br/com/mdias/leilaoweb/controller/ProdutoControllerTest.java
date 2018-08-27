@@ -1,17 +1,17 @@
 package br.com.mdias.leilaoweb.controller;
 
+import static org.junit.Assert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -21,7 +21,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import base.mvc.PayloadExtractor;
 import br.com.mdias.leilaoweb.config.SecurityConfig;
+import br.com.mdias.leilaoweb.controller.response.errors.validation.Errors;
+import br.com.mdias.leilaoweb.controller.response.jsend.JsonResult;
 import br.com.mdias.leilaoweb.model.Produto;
 
 /**
@@ -34,8 +37,7 @@ import br.com.mdias.leilaoweb.model.Produto;
 @RunWith(SpringRunner.class)
 @WebMvcTest(value=ProdutoController.class, secure=true)
 @Import(SecurityConfig.class)
-//@WithMockUser("rponte")
-
+@WithMockUser("rponte")
 /**
  * Teste levantando todo o contexto do Spring (moda antiga)
  */
@@ -49,6 +51,13 @@ public class ProdutoControllerTest {
 	@Autowired
 	private ObjectMapper jsonMapper;
 	
+	private PayloadExtractor payloadExtractor;
+	
+	@Before
+	public void init() {
+		this.payloadExtractor = new PayloadExtractor(jsonMapper);
+	}
+	
 	@Test
 	public void deveRetornarRespostaDeSucesso() throws Exception {
 		
@@ -57,12 +66,15 @@ public class ProdutoControllerTest {
 					.contentType(MediaType.APPLICATION_FORM_URLENCODED))
 			.andDo(print())
 			.andExpect(status().isOk())
-			// TODO: validar json de resposta
+			.andExpect(jsonPath("status").value(JsonResult.Status.SUCCESS.name()))
+			.andExpect(jsonPath("data").isNotEmpty())
+			.andExpect(jsonPath("message").isEmpty())
+			.andExpect(jsonPath("code").isEmpty())
 			;
 	}
 	
 	@Test
-	public void deveRetornarRespostaDeSucesso_paraCamposValidos() throws Exception {
+	public void deveRetornarRespostaDeSucesso_comMensagemDeSucesso() throws Exception {
 		
 		// cenário
 		Produto iphone = new Produto(2020, "iPhone X", 5989.90);
@@ -73,7 +85,10 @@ public class ProdutoControllerTest {
 					.content(toJson(iphone)))
 			.andDo(print())
 			.andExpect(status().isOk())
-			// TODO: validar json de resposta
+			.andExpect(jsonPath("status").value(JsonResult.Status.SUCCESS.name()))
+			.andExpect(jsonPath("data").exists())
+			.andExpect(jsonPath("message").value("Produto salvo com sucesso!"))
+			.andExpect(jsonPath("code").isEmpty())
 			;
 	}
 
@@ -89,23 +104,73 @@ public class ProdutoControllerTest {
 					.content(toJson(invalido)))
 			.andDo(print())
 			.andExpect(status().isBadRequest())
-			// TODO: validar json de resposta
+			.andExpect(jsonPath("status").value(JsonResult.Status.FAIL.name()))
+			.andExpect(jsonPath("data").isNotEmpty())
+			.andExpect(jsonPath("message").value("Erro de validação"))
+			.andExpect(jsonPath("code").isEmpty())
+			.andDo(payloadExtractor)
+			.andReturn()
+			;
+		
+		Errors errors = payloadExtractor.as(Errors.class);
+		assertEquals(3, errors.getErrors().size());
+	}
+
+	@Test
+	public void deveRetornarRespostaDeErro_paraJsonComFormatoInvalido() throws Exception {
+		
+		// cenário
+		Produto invalido = new Produto(null, "", 0.0);
+		String jsonComTipagemInvalida = toJson(invalido).replace("0.0", "\"not_a_number\"");
+		
+		// ação e validação
+		mvc.perform(post("/produtos/salvar")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(jsonComTipagemInvalida))
+			.andDo(print())
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("status").value(JsonResult.Status.FAIL.name()))
+			.andExpect(jsonPath("data").isNotEmpty())
+			.andExpect(jsonPath("message").isEmpty())
+			.andExpect(jsonPath("code").isEmpty())
 			;
 	}
 	
 	@Test
-	public void deveRetornarRespostaDeErro_paraExcecaoDeLogicaDeNegocio() throws Exception {
+	public void deveRetornarRespostaDeErro_paraErroDeLogicaDeNegocio() throws Exception {
 		
 		// cenário
-		Produto invalido = new Produto(-1, "Geladeira", 780.0);
+		Produto invalido = new Produto(-24, "Geladeira", 780.0);
 		
 		// ação e validação
 		mvc.perform(post("/produtos/salvar")
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(toJson(invalido)))
 			.andDo(print())
-			.andExpect(status().isBadRequest())
-			// TODO: validar json de resposta
+			.andExpect(status().isInternalServerError())
+			.andExpect(jsonPath("status").value(JsonResult.Status.ERROR.name()))
+			.andExpect(jsonPath("data").isEmpty())
+			.andExpect(jsonPath("message").value("Produto já existente no sistema"))
+			.andExpect(jsonPath("code").isEmpty())
+			;
+	}
+	
+	@Test
+	public void deveRetornarRespostaDeErroComInfosAdicionais_paraErroDeLogicaDeNegocio() throws Exception {
+		
+		// cenário
+		Produto invalido = new Produto(-69, "Fogão", 780.0);
+		
+		// ação e validação
+		mvc.perform(post("/produtos/salvar")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(toJson(invalido)))
+			.andDo(print())
+			.andExpect(status().isInternalServerError())
+			.andExpect(jsonPath("status").value(JsonResult.Status.ERROR.name()))
+			.andExpect(jsonPath("data").isNotEmpty())
+			.andExpect(jsonPath("message").value("Produto substituido por nova edição"))
+			.andExpect(jsonPath("code").value(7001))
 			;
 	}
 	

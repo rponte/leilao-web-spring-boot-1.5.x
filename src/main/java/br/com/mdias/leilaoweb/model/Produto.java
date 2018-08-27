@@ -3,6 +3,7 @@ package br.com.mdias.leilaoweb.model;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -12,6 +13,7 @@ public class Produto {
 	
 	@NotNull
 	@NotEmpty
+	@Size(min=1, max=255)
 	private String nome;
 	
 	@DecimalMin("1")
