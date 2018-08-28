@@ -49,8 +49,8 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 	private String jsonResult(AccessDeniedException exception) throws JsonProcessingException {
 		
 		JsonResult json = Json.fail()
-							  .withMessage(exception.getLocalizedMessage())
-							  .build();
+				.withMessage(exception.getLocalizedMessage())
+				.build();
 		
 		return jsonMapper.writeValueAsString(json);
 	}

@@ -16,21 +16,21 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
 	private static final Locale PT_BR = new Locale("pt", "BR");
 	
 	@Bean
-    public LocaleResolver localeResolver() {
-        SessionLocaleResolver resolver = new SessionLocaleResolver();
-        resolver.setDefaultLocale(PT_BR);
-        return resolver;
-    }
+	public LocaleResolver localeResolver() {
+		SessionLocaleResolver resolver = new SessionLocaleResolver();
+		resolver.setDefaultLocale(PT_BR);
+		return resolver;
+	}
 
-    @Bean
-    public LocaleChangeInterceptor localeChangeInterceptor() {
-        LocaleChangeInterceptor interceptor = new LocaleChangeInterceptor();
-        interceptor.setParamName("lang");
-        return interceptor;
-    }
+	@Bean
+	public LocaleChangeInterceptor localeChangeInterceptor() {
+		LocaleChangeInterceptor interceptor = new LocaleChangeInterceptor();
+		interceptor.setParamName("lang");
+		return interceptor;
+	}
 
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(localeChangeInterceptor());
-    }
+	@Override
+	public void addInterceptors(InterceptorRegistry registry) {
+		registry.addInterceptor(localeChangeInterceptor());
+	}
 }
