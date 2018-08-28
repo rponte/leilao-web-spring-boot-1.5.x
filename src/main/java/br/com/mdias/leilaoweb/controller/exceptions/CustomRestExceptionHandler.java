@@ -3,6 +3,9 @@ package br.com.mdias.leilaoweb.controller.exceptions;
 import java.util.List;
 import java.util.Locale;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +54,28 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
 		HttpHeaders headers = new HttpHeaders();
 		
 		return handleExceptionInternal(ex, body, headers, status, request);
+	}
+	
+	@ExceptionHandler({ ConstraintViolationException.class })
+	public ResponseEntity<Object> handleConstraintViolation(ConstraintViolationException ex, WebRequest request) {
+		
+		Errors errors = new Errors();
+	    for (ConstraintViolation<?> violation : ex.getConstraintViolations()) {
+	    	String field = violation.getPropertyPath().toString();
+	    	String message = violation.getMessage();
+	        errors
+	        	.with(field, message);
+	    }
+		
+		JsonResult body = Json.fail()
+							  .withMessage("Erro de validação")
+							  .withData(errors)
+							  .build();
+		
+	    HttpStatus status = HttpStatus.BAD_REQUEST;
+		HttpHeaders headers = new HttpHeaders();
+		
+		return new ResponseEntity<Object>(body, headers, status);
 	}
 	
 	/**

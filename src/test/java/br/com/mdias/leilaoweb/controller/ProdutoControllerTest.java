@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -32,6 +33,7 @@ import br.com.mdias.leilaoweb.controller.response.errors.validation.Errors;
 import br.com.mdias.leilaoweb.controller.response.errors.validation.ValidationError;
 import br.com.mdias.leilaoweb.controller.response.jsend.Status;
 import br.com.mdias.leilaoweb.model.Produto;
+import br.com.mdias.leilaoweb.service.ProdutoService;
 
 /**
  * Handling Standard Spring MVC Exceptions
@@ -42,7 +44,7 @@ import br.com.mdias.leilaoweb.model.Produto;
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(value=ProdutoController.class, secure=true)
-@Import(SecurityConfig.class)
+@Import({ SecurityConfig.class, ProdutoService.class })
 @WithMockUser("rponte")
 /**
  * Teste levantando todo o contexto do Spring (moda antiga)
@@ -343,6 +345,34 @@ public class ProdutoControllerTest {
 			.andExpect(jsonPath("code").isEmpty())
 			;
 		
+	}
+	
+	@Test
+	public void deveRetornarRespostaDeErro_paraCamposInvalidos_validadosNaCamadaDeService_automatico() throws Exception {
+		
+		// cenário
+		Produto macbook = new Produto(9091, "", 21000.90);
+		
+		// ação e validação
+		mvc.perform(put("/produtos/atualizar")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(toJson(macbook)))
+			.andDo(print())
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("status").value(Status.FAIL.name()))
+			.andExpect(jsonPath("data").isNotEmpty())
+			.andExpect(jsonPath("message").value("Erro de validação"))
+			.andExpect(jsonPath("code").isEmpty())
+			.andDo(payloadExtractor)
+			.andReturn()
+			;
+		
+		Errors errors = payloadExtractor.as(Errors.class);
+		assertThat(errors.getErrors())
+			.contains(new ValidationError("preco", "deve ser menor ou igual a 9999.99"),
+					  new ValidationError("nome", "Não pode estar vazio"),
+					  new ValidationError("nome", "tamanho deve estar entre 1 e 255"))
+			;
 	}
 	
 	private String toJson(Produto produto) throws JsonProcessingException {
