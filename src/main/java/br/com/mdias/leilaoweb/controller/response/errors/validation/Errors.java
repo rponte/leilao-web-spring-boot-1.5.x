@@ -10,6 +10,9 @@ public class Errors {
 
 	private List<ValidationError> errors = new ArrayList<>();
 	
+	/**
+	 * Registra novo erro para determinado campo
+	 */
 	public Errors with(String field, String message) {
 		errors.add(new ValidationError(field, message));
 		return this;
