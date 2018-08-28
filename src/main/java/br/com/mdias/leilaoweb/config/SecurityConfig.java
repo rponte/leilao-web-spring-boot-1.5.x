@@ -7,6 +7,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
 
@@ -21,24 +22,26 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
  
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
-        	.antMatchers(HttpMethod.GET, "/produtos/xxx/private-area").hasAnyAuthority("ROLE_XXX")
+        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        	.and()
+        	.authorizeRequests()
+        		.antMatchers(HttpMethod.GET, "/produtos/xxx/private-area").hasAnyAuthority("ROLE_XXX")
             .anyRequest()
-            .authenticated()
+            	.authenticated()
             .and().csrf().disable()
-            .exceptionHandling().accessDeniedHandler(accessDeniedHandler())
-            .authenticationEntryPoint(authenticationEntryPoint())
+            .exceptionHandling().accessDeniedHandler(customAccessDeniedHandler())
+            .authenticationEntryPoint(customAuthenticationEntryPoint())
             //.disable().anonymous()
             ;
     }
     
     @Bean
-    public AccessDeniedHandler accessDeniedHandler() {
+    public AccessDeniedHandler customAccessDeniedHandler() {
         return new CustomAccessDeniedHandler(jsonMapper);
     }
     
     @Bean
-    public AuthenticationEntryPoint authenticationEntryPoint() {
+    public AuthenticationEntryPoint customAuthenticationEntryPoint() {
     	return new CustomAuthenticationEntryPoint(jsonMapper);
     }
 }
