@@ -284,6 +284,33 @@ public class ProdutoControllerTest {
 			;
 	}
 	
+	@Test
+	public void deveRetornarRespostaDeErro_paraResourceNaoEncontrado_automatica() throws Exception {
+		
+		// cenário
+		String uriNaoExistente = "/clientes/uri-nao-existente";
+		
+		// ação e validação
+		mvc.perform(get(uriNaoExistente))
+			.andDo(print())
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("status").value(Status.FAIL.name()))
+			.andExpect(jsonPath("data").isEmpty())
+			.andExpect(jsonPath("message").value("No handler found for GET /clientes/uri-nao-existente"))
+			.andExpect(jsonPath("code").isEmpty())
+			;
+		
+		mvc.perform(post(uriNaoExistente)
+					.contentType(MediaType.APPLICATION_JSON))
+			.andDo(print())
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("status").value(Status.FAIL.name()))
+			.andExpect(jsonPath("data").isEmpty())
+			.andExpect(jsonPath("message").value("No handler found for POST /clientes/uri-nao-existente"))
+			.andExpect(jsonPath("code").isEmpty())
+			;
+	}
+	
 	private String toJson(Produto produto) throws JsonProcessingException {
 		return jsonMapper.writeValueAsString(produto);
 	}
