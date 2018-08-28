@@ -37,7 +37,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 		
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		if (auth != null) {
-			logger.warn("A not logged-in user '{}' attempted to access the protected URL '{}' ", auth.getName(), request.getRequestURI());
+			logger.warn("An unauthenticated user '{}' attempted to access the protected URL '{}' ", auth.getName(), request.getRequestURI());
 		}
 		
 		response.setStatus(HttpStatus.UNAUTHORIZED.value());

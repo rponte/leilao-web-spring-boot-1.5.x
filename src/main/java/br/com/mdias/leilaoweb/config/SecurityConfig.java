@@ -23,7 +23,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        	.and()
+    		.and()
         	.authorizeRequests()
         		.antMatchers(HttpMethod.GET, "/produtos/xxx/private-area").hasAnyAuthority("ROLE_XXX")
             .anyRequest()
