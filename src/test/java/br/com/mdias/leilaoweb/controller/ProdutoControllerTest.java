@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -309,6 +310,23 @@ public class ProdutoControllerTest {
 			.andExpect(jsonPath("message").value("No handler found for POST /clientes/uri-nao-existente"))
 			.andExpect(jsonPath("code").isEmpty())
 			;
+	}
+	
+	@WithAnonymousUser
+	@Test
+	public void deveRetornarRespostaDeErro_quandoUsuarioNaoAutenticado() throws Exception {
+		
+		// ação e validação
+		mvc.perform(get("/produtos/lista-todos")
+					.contentType(MediaType.APPLICATION_FORM_URLENCODED))
+			.andDo(print())
+			.andExpect(status().isUnauthorized())
+			.andExpect(jsonPath("status").value(Status.FAIL.name()))
+			.andExpect(jsonPath("data").isEmpty())
+			.andExpect(jsonPath("message").value("Full authentication is required to access this resource"))
+			.andExpect(jsonPath("code").isEmpty())
+			;
+		
 	}
 	
 	@Test

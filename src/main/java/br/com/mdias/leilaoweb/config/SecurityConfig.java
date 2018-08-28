@@ -7,6 +7,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,9 +24,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests()
         	.antMatchers(HttpMethod.GET, "/produtos/xxx/private-area").hasAnyAuthority("ROLE_XXX")
             .anyRequest()
-            .permitAll()
+            .authenticated()
             .and().csrf().disable()
-            .exceptionHandling().accessDeniedHandler(accessDeniedHandler());
+            .exceptionHandling().accessDeniedHandler(accessDeniedHandler())
+            .authenticationEntryPoint(authenticationEntryPoint())
+            //.disable().anonymous()
+            ;
     }
     
     @Bean
@@ -33,4 +37,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return new CustomAccessDeniedHandler(jsonMapper);
     }
     
+    @Bean
+    public AuthenticationEntryPoint authenticationEntryPoint() {
+    	return new CustomAuthenticationEntryPoint(jsonMapper);
+    }
 }
