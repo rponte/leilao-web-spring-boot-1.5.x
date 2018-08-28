@@ -113,6 +113,16 @@ public class ProdutoController {
 				   .withMessage("Produto salvo com sucesso!")
 				   .build();
 	}
+	
+	@GetMapping("/xxx/private-area")
+	public JsonResult privateArea() {
+		
+		Produto video = new Produto(69, "Porno video", 599.91);
+		
+		return Json.success()
+				   .withData(video)
+				   .build();
+	}
 
 	private boolean substiuido(Produto produto) {
 		return produto.getId() == -69;

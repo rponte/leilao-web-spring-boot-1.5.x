@@ -311,6 +311,22 @@ public class ProdutoControllerTest {
 			;
 	}
 	
+	@Test
+	public void deveRetornarRespostaDeErro_quandoUsuarioAutenticadoNaoPossirPermissao() throws Exception {
+		
+		// ação e validação
+		mvc.perform(get("/produtos/xxx/private-area")
+					.contentType(MediaType.APPLICATION_FORM_URLENCODED))
+			.andDo(print())
+			.andExpect(status().isForbidden())
+			.andExpect(jsonPath("status").value(Status.FAIL.name()))
+			.andExpect(jsonPath("data").isEmpty())
+			.andExpect(jsonPath("message").value("Access is denied"))
+			.andExpect(jsonPath("code").isEmpty())
+			;
+		
+	}
+	
 	private String toJson(Produto produto) throws JsonProcessingException {
 		return jsonMapper.writeValueAsString(produto);
 	}
