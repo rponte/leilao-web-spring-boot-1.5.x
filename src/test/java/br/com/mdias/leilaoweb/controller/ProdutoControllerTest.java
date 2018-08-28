@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import base.mvc.PayloadExtractor;
 import br.com.mdias.leilaoweb.config.SecurityConfig;
 import br.com.mdias.leilaoweb.controller.response.errors.validation.Errors;
+import br.com.mdias.leilaoweb.controller.response.errors.validation.ValidationError;
 import br.com.mdias.leilaoweb.controller.response.jsend.Status;
 import br.com.mdias.leilaoweb.model.Produto;
 
@@ -124,7 +125,12 @@ public class ProdutoControllerTest {
 			.andExpect(jsonPath("data").exists())
 			.andExpect(jsonPath("message").value("Produto salvo com sucesso!"))
 			.andExpect(jsonPath("code").isEmpty())
+			.andDo(payloadExtractor)
 			;
+		
+		Produto payload = payloadExtractor.as(Produto.class);
+		assertThat(payload)
+			.isEqualToComparingFieldByField(iphone);
 	}
 
 	@Test
@@ -148,7 +154,11 @@ public class ProdutoControllerTest {
 			;
 		
 		Errors errors = payloadExtractor.as(Errors.class);
-		assertEquals(3, errors.getErrors().size());
+		assertThat(errors.getErrors())
+			.contains(new ValidationError("preco", "deve ser maior ou igual a 1"),
+					  new ValidationError("nome", "Não pode estar vazio"),
+					  new ValidationError("nome", "tamanho deve estar entre 1 e 255"))
+			;
 	}
 
 	@Test
@@ -186,36 +196,24 @@ public class ProdutoControllerTest {
 			.andExpect(jsonPath("data").isNotEmpty())
 			.andExpect(jsonPath("message").value("Produto substituido por nova edição"))
 			.andExpect(jsonPath("code").value(7001))
+			.andDo(payloadExtractor)
 			;
+		
+		Produto payload = payloadExtractor.as(Produto.class);
+		assertThat(payload)
+			.isEqualToComparingFieldByField(new Produto(-70, invalido.getNome(), 999.80));
+		
+		
 	}
 	
 	/**
 	 * ****
 	 * Testes para tratamentos customizados e automaticos do Spring MVC
+	 * - validação via @Valid;
+	 * - tratamento de exceções internas do Spring MVC;
+	 * - tratamento de exceções de negócio lançadas dos controllers;
 	 * **** 
 	 */
-	
-	@Test
-	public void deveRetornarRespostaDeErro_paraJsonComFormatoInvalido_automatico() throws Exception {
-		
-		// cenário
-		Produto invalido = new Produto(null, "", 0.0);
-		String jsonComTipagemInvalida = toJson(invalido).replace("0.0", "\"not_a_number\"");
-		
-		// ação e validação
-		String expectedError = "JSON parse error: Can not deserialize value of type java.lang.Double from String \"not_a_number\": not a valid Double value";
-		
-		mvc.perform(post("/produtos/salvar")
-					.contentType(MediaType.APPLICATION_JSON)
-					.content(jsonComTipagemInvalida))
-			.andDo(print())
-			.andExpect(status().isBadRequest())
-			.andExpect(jsonPath("status").value(Status.FAIL.name()))
-			.andExpect(jsonPath("data").isEmpty())
-			.andExpect(jsonPath("message").value(containsString(expectedError)))
-			.andExpect(jsonPath("code").isEmpty())
-			;
-	}
 	
 	@Test
 	public void deveRetornarRespostaDeErro_paraCamposInvalidos_automatico() throws Exception {
@@ -238,7 +236,33 @@ public class ProdutoControllerTest {
 			;
 		
 		Errors errors = payloadExtractor.as(Errors.class);
-		assertEquals(3, errors.getErrors().size());
+		assertThat(errors.getErrors())
+			.contains(new ValidationError("preco", "deve ser maior ou igual a 1"),
+					  new ValidationError("nome", "Não pode estar vazio"),
+					  new ValidationError("nome", "tamanho deve estar entre 1 e 255"))
+			;
+	}
+	
+	@Test
+	public void deveRetornarRespostaDeErro_paraErroInternosDoSpringMVC_automatico() throws Exception {
+		
+		// cenário
+		Produto invalido = new Produto(null, "", 0.0);
+		String jsonComTipagemInvalida = toJson(invalido).replace("0.0", "\"not_a_number\"");
+		
+		// ação e validação
+		String expectedError = "JSON parse error: Can not deserialize value of type java.lang.Double from String \"not_a_number\": not a valid Double value";
+		
+		mvc.perform(post("/produtos/salvar")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(jsonComTipagemInvalida))
+			.andDo(print())
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("status").value(Status.FAIL.name()))
+			.andExpect(jsonPath("data").isEmpty())
+			.andExpect(jsonPath("message").value(containsString(expectedError)))
+			.andExpect(jsonPath("code").isEmpty())
+			;
 	}
 	
 	@Test

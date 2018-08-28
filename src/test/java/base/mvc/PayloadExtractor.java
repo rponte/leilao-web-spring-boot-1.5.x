@@ -6,7 +6,6 @@ import java.util.List;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultHandler;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.jayway.jsonpath.JsonPath;
@@ -33,26 +32,29 @@ public class PayloadExtractor implements ResultHandler {
 	 * instance of <code>payloadClass</code> type
 	 */
 	public <T> T as(Class<T> payloadClass) throws UnsupportedEncodingException {
-		
-		String body = result.getResponse().getContentAsString();
-		
-		JsonPath jsonPath = JsonPath.compile("@.data");
-		Object data = jsonPath.read(body);
-		
+		Object data = extractDataPayloadFromHttpBody();
 		T payload = jsonMapper.convertValue(data, payloadClass);
 		return payload;
 	}
 
+	/**
+	 * Extracts payload <code>@.data</code> from HTTP body and convert it to a
+	 * collection of instances of <code>payloadClass</code> type
+	 */
 	public <T> List<T> asListOf(Class<T> payloadClass) throws UnsupportedEncodingException {
 		
-		String body = result.getResponse().getContentAsString();
-		
-		JsonPath jsonPath = JsonPath.compile("@.data");
-		Object data = jsonPath.read(body);
+		Object data = extractDataPayloadFromHttpBody();
 		
 		CollectionType listType = jsonMapper.getTypeFactory().constructCollectionType(List.class, payloadClass);
 		List<T> payload = jsonMapper.convertValue(data, listType);
 		return payload;
+	}
+	
+	private Object extractDataPayloadFromHttpBody() throws UnsupportedEncodingException {
+		String body = result.getResponse().getContentAsString();
+		JsonPath jsonPath = JsonPath.compile("@.data");
+		Object data = jsonPath.read(body);
+		return data;
 	}
 	
 }

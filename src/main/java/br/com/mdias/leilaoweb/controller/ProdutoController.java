@@ -107,14 +107,6 @@ public class ProdutoController {
 			throw new ProdutoInvalidoException("Produto já existente no sistema");
 		}
 		
-		// logica de negocio com mensagem e payload
-		if (substiuido(produto)) {
-			return Json.error()
-					   .withMessage("Produto substituido por nova edição", 7001)
-					   .withData(new Produto(-70, produto.getNome(), 999.80))
-					   .build();
-		}
-		
 		// sucesso
 		return Json.success()
 				   .withData(produto)
