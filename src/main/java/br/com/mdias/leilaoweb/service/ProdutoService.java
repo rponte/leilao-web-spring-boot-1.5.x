@@ -27,7 +27,7 @@ public class ProdutoService {
 		
 		Set<ConstraintViolation<Produto>> violations = validator.validate(produto);
 		for (ConstraintViolation<Produto> violation : violations) {
-			logger.error(violation.getMessage()); 
+			logger.error("field error '{}': '{}'", violation.getPropertyPath(), violation.getMessage()); 
 		}
 		
 		throw new ConstraintViolationException(violations);
