@@ -11,6 +11,11 @@ import com.fasterxml.jackson.databind.type.CollectionType;
 import com.jayway.jsonpath.JsonPath;
 
 /**
+ * Result Handler utilizado para extrair o payload do <code>JsonResult</code>.
+ * Basicamente ele guarda o resultado da requisição e permite que, em seguida,
+ * se extraia o json do nó <code>@.data</code> convertendo-o para um tipo
+ * informado.
+ * 
  * https://www.baeldung.com/jackson-object-mapper-tutorial
  */
 public class PayloadExtractor implements ResultHandler {
