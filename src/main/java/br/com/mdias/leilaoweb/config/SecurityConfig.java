@@ -29,8 +29,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .anyRequest()
             	.authenticated()
             .and().csrf().disable()
-            .exceptionHandling().accessDeniedHandler(customAccessDeniedHandler())
-            .authenticationEntryPoint(customAuthenticationEntryPoint())
+            .exceptionHandling()
+            	.accessDeniedHandler(customAccessDeniedHandler())
+            	.authenticationEntryPoint(customAuthenticationEntryPoint())
             //.disable().anonymous()
             ;
     }
