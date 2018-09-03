@@ -13,6 +13,12 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import br.com.mdias.leilaoweb.config.security.CustomAccessDeniedHandler;
+import br.com.mdias.leilaoweb.config.security.CustomAuthenticationEntryPoint;
+
+/**
+ * https://www.baeldung.com/securing-a-restful-web-service-with-spring-security
+ */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {

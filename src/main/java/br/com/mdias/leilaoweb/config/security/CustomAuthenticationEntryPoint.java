@@ -1,4 +1,4 @@
-package br.com.mdias.leilaoweb.config;
+package br.com.mdias.leilaoweb.config.security;
 
 import java.io.IOException;
 
