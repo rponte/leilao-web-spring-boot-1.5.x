@@ -6,15 +6,15 @@ package br.com.mdias.leilaoweb.controller.response.jsend;
  */
 public class Json {
 
-	public static JsonResultBuilder success() {
-		return new JsonResultBuilder().success();
+	public static <T> JsonResultBuilder<T> success() {
+		return new JsonResultBuilder<T>().success();
 	}
 	
-	public static JsonResultBuilder error() {
-		return new JsonResultBuilder().error();
+	public static <T> JsonResultBuilder<T> error() {
+		return new JsonResultBuilder<T>().error();
 	}
 	
-	public static JsonResultBuilder fail() {
-		return new JsonResultBuilder().fail();
+	public static <T> JsonResultBuilder<T> fail() {
+		return new JsonResultBuilder<T>().fail();
 	}
 }

@@ -48,7 +48,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 	
 	private String jsonResult(AuthenticationException exception) throws JsonProcessingException {
 		
-		JsonResult json = Json.fail()
+		JsonResult<String> json = Json.fail()
 				.withMessage(exception.getLocalizedMessage())
 				.build();
 		

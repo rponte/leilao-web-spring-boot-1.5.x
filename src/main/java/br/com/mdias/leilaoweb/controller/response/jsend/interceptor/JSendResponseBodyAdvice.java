@@ -17,7 +17,7 @@ import br.com.mdias.leilaoweb.controller.response.jsend.Status;
  * status do <code>JsonResult</code> retornado pelo controller
  */
 @ControllerAdvice
-public class JSendResponseBodyAdvice implements ResponseBodyAdvice<JsonResult> {
+public class JSendResponseBodyAdvice implements ResponseBodyAdvice<JsonResult<?>> {
 
 	@Override
 	public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
@@ -25,7 +25,7 @@ public class JSendResponseBodyAdvice implements ResponseBodyAdvice<JsonResult> {
 	}
 
 	@Override
-	public JsonResult beforeBodyWrite(JsonResult body, MethodParameter returnType, MediaType selectedContentType,
+	public JsonResult<?> beforeBodyWrite(JsonResult<?> body, MethodParameter returnType, MediaType selectedContentType,
 			Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request,
 			ServerHttpResponse response) {
 		
@@ -36,7 +36,7 @@ public class JSendResponseBodyAdvice implements ResponseBodyAdvice<JsonResult> {
 	/**
 	 * Figures out the Http Status related to JSend status
 	 */
-	private HttpStatus statusFor(JsonResult json) {
+	private HttpStatus statusFor(JsonResult<?> json) {
 		Status jsendStatus = json.getStatus();
 		return HttpStatus.valueOf(jsendStatus.getHttpStatusCode());
 	}

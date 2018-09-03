@@ -37,17 +37,17 @@ public class ProdutoController {
 	private ProdutoService service;
 	
 	@GetMapping("/{id}")
-	public JsonResult buscaPorId(@PathVariable("id") Integer id) {
+	public JsonResult<Produto> buscaPorId(@PathVariable("id") Integer id) {
 		
 		Produto ipad = new Produto(id, "iPad Retina Display", 4560.99);
 		
-		return Json.success()
+		return Json.<Produto>success()
 				   .withData(ipad)
-				   .build();
+				   .build2();
 	}
 	
 	@GetMapping("/lista-todos")
-	public JsonResult lista() {
+	public JsonResult<List<Produto>> lista() {
 		
 		Produto ipad = new Produto(991, "iPad Retina Display", 4560.99);
 		Produto iphone = new Produto(992, "iPhone 8 Plus", 4400.91);
@@ -60,7 +60,7 @@ public class ProdutoController {
 	}
 
 	@PostMapping("/salvar")
-	public JsonResult salvar(@Valid @RequestBody Produto produto, BindingResult result) {
+	public JsonResult<?> salvar(@Valid @RequestBody Produto produto, BindingResult result) {
 		
 		// erro de validação
 		if (result.hasErrors()) {
@@ -105,7 +105,7 @@ public class ProdutoController {
 	}
 	
 	@PostMapping("/salvar-smart")
-	public JsonResult salvar(@Valid @RequestBody Produto produto) {
+	public JsonResult<Produto> salvar(@Valid @RequestBody Produto produto) {
 
 		// logica de negocio com mensagem
 		if (existe(produto)) {
@@ -120,7 +120,7 @@ public class ProdutoController {
 	}
 	
 	@GetMapping("/xxx/private-area")
-	public JsonResult privateArea() {
+	public JsonResult<Produto> privateArea() {
 		
 		Produto video = new Produto(69, "Porno video", 599.91);
 		
@@ -130,7 +130,7 @@ public class ProdutoController {
 	}
 	
 	@PutMapping("/atualizar")
-	public JsonResult atualizar(@RequestBody Produto produto) {
+	public JsonResult<Produto> atualizar(@RequestBody Produto produto) {
 		
 		service.atualiza(produto);
 		

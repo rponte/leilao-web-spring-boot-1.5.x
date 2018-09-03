@@ -67,7 +67,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
 	        	.with(field, message);
 	    }
 		
-		JsonResult body = Json.fail()
+		JsonResult<Errors> body = Json.fail()
 							  .withMessage("Erro de validação")
 							  .withData(errors)
 							  .build();
@@ -101,7 +101,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
 				;
 		}
 		
-		JsonResult body = Json.fail()
+		JsonResult<Errors> body = Json.fail()
 							  .withMessage("Erro de validação")
 							  .withData(errors)
 							  .build();

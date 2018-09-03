@@ -3,15 +3,15 @@ package br.com.mdias.leilaoweb.controller.response.jsend;
 /**
  * Based on jSend JSON Response - http://labs.omniti.com/labs/jsend
  */
-public class JsonResult {
+public class JsonResult<T> {
 
 	private Status status;
-	private Object data;
+	private T data;
 	
 	private String message;
 	private Integer code;
 	
-	public Object getData() {
+	public T getData() {
 		return data;
 	}
 	public Status getStatus() {
@@ -23,7 +23,7 @@ public class JsonResult {
 	public Integer getCode() {
 		return code;
 	}
-	public void setData(Object data) {
+	public void setData(T data) {
 		this.data = data;
 	}
 	public void setStatus(Status status) {
