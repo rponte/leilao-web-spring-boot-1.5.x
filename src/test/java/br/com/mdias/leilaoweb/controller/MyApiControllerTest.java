@@ -148,7 +148,7 @@ public class MyApiControllerTest {
 	}
 	
 	@Test
-	public void deveAcessarRecursoPrivado_quandoCredenciaisInformadas_viaSSO() throws Exception {
+	public void deveAcessarRecursoPrivadoOuProtegido_quandoCredenciaisInformadas_viaSSO() throws Exception {
 		
 		// COM credencias - ROLE_ADMIN
 		String username = "admin";
@@ -157,7 +157,7 @@ public class MyApiControllerTest {
 		
 		mvc.perform(get("/api/private/machine-username")
 					.contentType(MediaType.APPLICATION_FORM_URLENCODED)
-					.with(withSsoUser(username))
+					.with(ssoUser(username))
 					)
 			.andDo(print())
 			.andExpect(status().isOk())
@@ -165,8 +165,42 @@ public class MyApiControllerTest {
 			;
 		
 	}
+	
+	@Test
+	public void naoDeveAcessarRecursoPrivadoOuProtegido_quandoCredenciaisNaoInformadas_viaSSO() throws Exception {
+		
+		// COM credencias - ROLE_USER
+		String username = "usuario-inexistente";
+		
+		mvc.perform(get("/api/private/machine-username")
+					.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+					.with(ssoUser(username))
+					)
+			.andDo(print())
+			.andExpect(status().isUnauthorized())
+			.andExpect(jsonPath("$.message").value("Full authentication is required to access this resource"))
+			;
+		
+	}
+	
+	@Test
+	public void naoDeveAcessarRecursoPrivadoOuProtegido_quandoCredenciaisInformadasMasSemPermissao_viaSSO() throws Exception {
+		
+		// COM credencias - ROLE_USER
+		String username = "rponte";
+		
+		mvc.perform(get("/api/private/machine-username")
+					.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+					.with(ssoUser(username))
+					)
+			.andDo(print())
+			.andExpect(status().isForbidden())
+			.andExpect(jsonPath("$.message").value("Access is denied"))
+			;
+		
+	}
 
-	private RequestPostProcessor withSsoUser(final String username) {
+	private RequestPostProcessor ssoUser(final String username) {
 		return new RequestPostProcessor() {
 			@Override
 			public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
