@@ -42,9 +42,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 		auth.inMemoryAuthentication()
-			.withUser("rponte").password("pia-limpa").roles("USER")
-			.and()
-			.withUser("admin").password("admin").roles("ADMIN", "USER")
+			.withUser("rponte").password("pia-limpa").roles("USER").and()
+			.withUser("admin").password("admin").roles("ADMIN", "USER").and()
+			// mdias users
+			.withUser("ter00942").password("ter00942").roles("ADMIN", "USER").and()
+			.withUser("ter01205").password("ter01205").roles("USER")
 			;
 	}
 	
