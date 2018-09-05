@@ -135,11 +135,11 @@ public class MyApiControllerTest {
 		
 		// COM credencias invalidas
 		String username = "admin";
-		String password = "senha-errada";
+		String invalidPassword = "senha-errada";
 		
 		mvc.perform(get("/api/private/machine-username")
 					.contentType(MediaType.APPLICATION_FORM_URLENCODED)
-					.with(httpBasic(username, password)))
+					.with(httpBasic(username, invalidPassword)))
 			.andDo(print())
 			.andExpect(status().isUnauthorized())
 			.andExpect(jsonPath("$.message").value("Bad credentials"))
@@ -169,12 +169,12 @@ public class MyApiControllerTest {
 	@Test
 	public void naoDeveAcessarRecursoPrivadoOuProtegido_quandoCredenciaisNaoInformadas_viaSSO() throws Exception {
 		
-		// COM credencias - ROLE_USER
-		String username = "usuario-inexistente";
+		// usuário nao existente
+		String usuarioNaoExistente = "usuario-inexistente";
 		
 		mvc.perform(get("/api/private/machine-username")
 					.contentType(MediaType.APPLICATION_FORM_URLENCODED)
-					.with(ssoUser(username))
+					.with(ssoUser(usuarioNaoExistente))
 					)
 			.andDo(print())
 			.andExpect(status().isUnauthorized())
@@ -187,11 +187,11 @@ public class MyApiControllerTest {
 	public void naoDeveAcessarRecursoPrivadoOuProtegido_quandoCredenciaisInformadasMasSemPermissao_viaSSO() throws Exception {
 		
 		// COM credencias - ROLE_USER
-		String username = "rponte";
+		String usuarioComum = "rponte";
 		
 		mvc.perform(get("/api/private/machine-username")
 					.contentType(MediaType.APPLICATION_FORM_URLENCODED)
-					.with(ssoUser(username))
+					.with(ssoUser(usuarioComum))
 					)
 			.andDo(print())
 			.andExpect(status().isForbidden())
