@@ -13,13 +13,17 @@ import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.util.StringUtils;
 
+/**
+ * Necessário somente para autenticação padrão do Spring Security via FORM. Não
+ * faz sentido para REST APIs.
+ */
 public class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 	
 	private RequestCache requestCache = new HttpSessionRequestCache();
 
 	@Override
 	protected void handle(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-		// TODO: reimplemtar logica do onAuthenticationSuccess() aqui
+		// TODO: reimplemtar logica do onAuthenticationSuccess() aqui (versões mais recentes do Spring Security)
 		super.handle(request, response, authentication);
 	}
 	
