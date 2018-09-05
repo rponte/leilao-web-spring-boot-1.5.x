@@ -29,7 +29,7 @@ public class MyApiControllerTest {
 	
 	@Autowired
 	protected MockMvc mvc;
-
+	
 	@Test
 	public void deveAcessarRecursoPublico_comOuSemCredenciaisInformadas() throws Exception {
 		
@@ -215,6 +215,45 @@ public class MyApiControllerTest {
 			.andExpect(jsonPath("$.message").value("Access is denied"))
 			;
 		
+	}
+	
+	@Test
+	public void deveRetornarInfosDoUsuarioLogado_viaHttpAuth_e_SSO() throws Exception {
+		
+		String username = "admin";
+		
+		// SSO
+		mvc.perform(get("/api/public/who-am-i")
+					.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+					.with(ssoUser(username))
+					)
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.username").value(username))
+			.andExpect(jsonPath("$.data.authorities").isArray())
+			;
+		
+		// http basic auth
+		mvc.perform(get("/api/public/who-am-i")
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+				.with(httpBasic(username, username))
+				)
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.username").value(username))
+			.andExpect(jsonPath("$.data.authorities").isArray())
+			;
+	}
+	
+	@Test
+	public void naoDeveRetornarInfosDoUsuarioLogado_quandoUsuarioForAnonimo_viaHttpAuth_e_SSO() throws Exception {
+		
+		mvc.perform(get("/api/public/who-am-i")
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED))
+		.andDo(print())
+		.andExpect(status().isBadRequest())
+		.andExpect(jsonPath("$.data").value("Sorry Mr Anonymous, we have no idea who you are!"))
+		;
 	}
 
 	private RequestPostProcessor ssoUser(final String username) {

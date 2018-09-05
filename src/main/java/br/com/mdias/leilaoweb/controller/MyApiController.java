@@ -6,6 +6,8 @@ import java.time.format.DateTimeFormatter;
 
 import org.springframework.http.MediaType;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,6 +18,20 @@ import br.com.mdias.leilaoweb.controller.response.jsend.JsonResult;
 @RestController
 @RequestMapping(value = "/api", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 public class MyApiController {
+	
+	@GetMapping("/public/who-am-i")
+	public JsonResult<?> whoAmI(@AuthenticationPrincipal UserDetails user) {
+		
+		if (user == null) {
+			return Json.fail()
+					   .withData("Sorry Mr Anonymous, we have no idea who you are!")
+					   .build();
+		}
+		
+		return Json.success()
+				   .withData(user)
+				   .build();
+	}
 
 	@GetMapping("/public/say-my-name")
 	public JsonResult<String> sayMyName(Principal principal) {
