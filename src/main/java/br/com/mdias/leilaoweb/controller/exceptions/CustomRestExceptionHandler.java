@@ -13,6 +13,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -77,6 +78,16 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
 		
 		return new ResponseEntity<Object>(body, headers, status);
 	}
+	
+	/**
+	 * Handling <code>AccessDeniedException</code> thrown by controllers, usually
+	 * via <code>@Secure</code> annotation
+	 */
+	@ExceptionHandler({ AccessDeniedException.class })
+    public ResponseEntity<Object> handleAccessDeniedException(AccessDeniedException accessDenied, WebRequest request) {
+		// re-throws exception so that Spring Security's AccessDeniedHandler can handle it
+		throw accessDenied;
+    }
 	
 	/**
 	 * Customiza response de erro quando ocorrer erro de validação

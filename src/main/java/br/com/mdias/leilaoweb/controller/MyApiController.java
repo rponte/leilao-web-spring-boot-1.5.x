@@ -1,8 +1,11 @@
 package br.com.mdias.leilaoweb.controller;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import org.springframework.http.MediaType;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,6 +36,15 @@ public class MyApiController {
 		String username = principal.getName();
 		return Json.success()
 				   .withData(username.length())
+				   .build();
+	}
+	
+	@Secured("ROLE_ADMIN")
+	@GetMapping("/protected/what-time-is-it")
+	public JsonResult<String> whatTimeIsIt() {
+		String now = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME);
+		return Json.success()
+				   .withData(now)
 				   .build();
 	}
 	

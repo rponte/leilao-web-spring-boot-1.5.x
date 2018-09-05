@@ -131,6 +131,23 @@ public class MyApiControllerTest {
 	}
 	
 	@Test
+	public void naoDeveAcessarRecursoPrivado_quandoUsuarioNaoTiverPermissao_validadoViaAnotacaoSecured() throws Exception {
+		
+		// COM credencias mas sem permissao
+		String username = "rponte";
+		String password = "pia-limpa";
+		
+		mvc.perform(get("/api/protected/what-time-is-it")
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+				.with(httpBasic(username, password)))
+		.andDo(print())
+		.andExpect(status().isForbidden())
+		.andExpect(jsonPath("$.message").value("Acesso negado")) // pt_BR pois interceptor (AffirmativeBased) traduz
+		;
+		
+	}
+	
+	@Test
 	public void naoDeveAcessarRecursoPrivado_quandoCredenciaisInvalidas() throws Exception {
 		
 		// COM credencias invalidas
