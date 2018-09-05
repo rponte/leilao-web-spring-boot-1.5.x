@@ -1,9 +1,7 @@
 package br.com.mdias.leilaoweb.controller.exceptions;
 
-import java.util.List;
 import java.util.Locale;
 
-import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 
 import org.slf4j.Logger;
@@ -15,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -60,13 +57,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler({ ConstraintViolationException.class })
 	public ResponseEntity<Object> handleConstraintViolation(ConstraintViolationException ex, WebRequest request) {
 		
-		Errors errors = new Errors();
-	    for (ConstraintViolation<?> violation : ex.getConstraintViolations()) {
-	    	String field = violation.getPropertyPath().toString();
-	    	String message = violation.getMessage();
-	        errors
-	        	.with(field, message);
-	    }
+		Errors errors = Errors.of(ex);
 		
 		JsonResult<Errors> body = Json.fail()
 							  .withMessage("Erro de validação")
@@ -99,18 +90,10 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
 		
 		logger.error("Catching a validation error on '{}'", ex.getParameter().getMethod().toGenericString());
 		
-		Errors errors = new Errors();
 		Locale locale = request.getLocale();
-		
 		BindingResult result = ex.getBindingResult();
-		List<FieldError> fieldErrors = result.getFieldErrors();
-		for (FieldError fieldError : fieldErrors) {
-			String field = fieldError.getField();
-			String message = messageSource.getMessage(fieldError, locale);
-			errors
-				.with(field, message);
-				;
-		}
+		
+		Errors errors = Errors.of(result, locale, messageSource);
 		
 		JsonResult<Errors> body = Json.fail()
 							  .withMessage("Erro de validação")
