@@ -20,6 +20,8 @@ public class Produto {
 	@DecimalMax("9999.99")
 	private Double preco;
 	
+	private Categoria categoria;
+	
 	public Produto() {}
 	
 	public Produto(Integer id, String nome, Double preco) {
@@ -45,6 +47,12 @@ public class Produto {
 	}
 	public void setPreco(Double preco) {
 		this.preco = preco;
+	}
+	public Categoria getCategoria() {
+		return categoria;
+	}
+	public void setCategoria(Categoria categoria) {
+		this.categoria = categoria;
 	}
 
 	@Override

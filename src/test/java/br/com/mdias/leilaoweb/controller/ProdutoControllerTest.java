@@ -247,7 +247,7 @@ public class ProdutoControllerTest {
 	}
 	
 	@Test
-	public void deveRetornarRespostaDeErro_paraErroInternosDoSpringMVC_automatico() throws Exception {
+	public void deveRetornarRespostaDeErro_paraErrosInternosDoSpringMVC_JsonParserError_automatico() throws Exception {
 		
 		// cenário
 		Produto invalido = new Produto(null, "", 0.0);
@@ -255,6 +255,29 @@ public class ProdutoControllerTest {
 		
 		// ação e validação
 		String expectedError = "JSON parse error: Can not deserialize value of type java.lang.Double from String \"not_a_number\": not a valid Double value";
+		
+		mvc.perform(post("/produtos/salvar")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(jsonComTipagemInvalida))
+			.andDo(print())
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("status").value(Status.FAIL.name()))
+			.andExpect(jsonPath("data").isEmpty())
+			.andExpect(jsonPath("message").value(containsString(expectedError)))
+			.andExpect(jsonPath("code").isEmpty())
+			;
+	}
+	
+	@Test
+	public void deveRetornarRespostaDeErro_paraErrosInternosDoSpringMVC_JsonParserErrorForEntityGraph_automatico() throws Exception {
+		
+		// cenário
+		Produto produto = new Produto(89, "Apple Watch", 2199.0);
+		produto.setCategoria(null);
+		String jsonComTipagemInvalida = toJson(produto).replace("null", "\"invalid_json_object\"");
+		
+		// ação e validação
+		String expectedError = "JSON parse error: Can not construct instance of br.com.mdias.leilaoweb.model.Categoria: no String-argument constructor/factory method to deserialize from String value ('invalid_json_object'); nested exception is com.fasterxml.jackson.databind.JsonMappingException: Can not construct instance of br.com.mdias.leilaoweb.model.Categoria: no String-argument constructor/factory method to deserialize from String value ('invalid_json_object')";
 		
 		mvc.perform(post("/produtos/salvar")
 					.contentType(MediaType.APPLICATION_JSON)
