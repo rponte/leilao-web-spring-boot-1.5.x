@@ -41,6 +41,7 @@ import br.com.mdias.leilaoweb.service.ProdutoService;
  * 
  * https://www.baeldung.com/exception-handling-for-rest-with-spring
  * https://www.baeldung.com/global-error-handler-in-a-spring-rest-api
+ * https://www.baeldung.com/spring-security-integration-tests
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(value=ProdutoController.class, secure=true)
@@ -48,6 +49,7 @@ import br.com.mdias.leilaoweb.service.ProdutoService;
 @WithMockUser("rponte")
 /**
  * Teste levantando todo o contexto do Spring (moda antiga)
+ * https://www.baeldung.com/spring-security-integration-tests
  */
 //@SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT)
 //@AutoConfigureMockMvc
