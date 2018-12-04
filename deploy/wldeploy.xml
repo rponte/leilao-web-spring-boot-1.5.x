@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="wldeploy" basedir=".">
+
+	<!-- Inicializa task do Weblogic Deployer -->
+    <taskdef name="wldeploy_int" classname="weblogic.ant.taskdefs.management.WLDeploy">
+    	<classpath>
+    		<fileset dir="deploy/lib">
+	            <include name="wlfullclient.jar" />
+	        </fileset>
+    	</classpath>
+    </taskdef>
+                                 
+    <!-- ======================================================
+         Faz deploy de uma app (WAR ou EAR) num servidor WebLogic
+         https://docs.oracle.com/cd/E13222_01/wls/docs103/programming/wldeploy.html
+         ====================================================== -->
+    <macrodef name="wldeploy-deploy">
+        <attribute name="name" />
+        <attribute name="source" />
+        <attribute name="environment" default="local" />
+        <sequential>
+            <!-- loads deploy configuration -->
+            <property name="deploy.file.name" value="deploy/server-@{environment}.properties" />
+            
+            <echo>Loading deploy configuration from '${deploy.file.name}'</echo>
+            <property file="${deploy.file.name}" />
+            
+            <!-- starts the deploy -->
+            <echo>Deploying app '@{name}' (@{source}) into server '${deploy.server.admin.url}' (environment=@{environment})</echo>
+            <wldeploy_int   action="deploy" 
+                            adminurl="${deploy.server.admin.url}" 
+                            user="${deploy.server.user}" password="${deploy.server.password}" 
+                            targets="${deploy.server.targets}" 
+                            debug="true" verbose="true" upload="true" remote="true"
+                            name="@{name}" source="@{source}" 
+                            usenonexclusivelock="true" />
+        </sequential>
+    </macrodef>
+    
+	<!-- ======================================================
+         Faz UNdeploy de uma app (WAR ou EAR) num servidor WebLogic
+         ====================================================== -->
+    <macrodef name="wldeploy-undeploy">
+        <attribute name="name" />
+        <attribute name="environment" default="local" />
+        <sequential>
+            <!-- loads deploy configuration -->
+            <property name="deploy.file.name" value="deploy/server-@{environment}.properties" />
+            
+            <echo>Loading deploy configuration from '${deploy.file.name}'</echo>
+            <property file="${deploy.file.name}" />
+            
+            <!-- starts the deploy -->
+            <echo>Undeploying app '@{name}' from server '${deploy.server.admin.url}' (environment=@{environment})</echo>
+            <wldeploy_int   action="undeploy" 
+                            adminurl="${deploy.server.admin.url}" 
+                            user="${deploy.server.user}" password="${deploy.server.password}" 
+                            targets="${deploy.server.targets}" 
+                            debug="true" verbose="true"
+                            name="@{name}" failonerror="false"
+                            usenonexclusivelock="true" />
+        </sequential>
+    </macrodef>
+
+</project>
