@@ -21,26 +21,33 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<java.version>1.7</java.version>
+		<java.version>1.7</java.version> <!-- recomendado 1.6 por causa do Weblogic -->
 	</properties>
 
 	<dependencies>
+		<!-- ***************************** -->
+		<!-- Production dependencies -->
+		<!-- ***************************** -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
+		
 		<!-- Needed to build a war file -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -48,12 +55,14 @@
 			<scope>provided</scope>
 		</dependency>
 		
+		<!-- Needed to run in WebLogic 11g (10.3.x) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-legacy</artifactId>
 			<version>1.1.0.RELEASE</version>
 		</dependency>
 
+		<!-- Only needed in Development -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
@@ -61,24 +70,40 @@
 		</dependency>
 		
 		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		
+		<!-- ***************************** -->
+		<!-- Testing dependencies -->
+		<!-- ***************************** -->
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
 		
-		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-			<scope>runtime</scope>
-		</dependency>
 	</dependencies>
 
 	<build>
+		<!-- mvn eclipse:clean eclipse:eclipse -->
+		<!-- NO_M2ECLIPSE_SUPPORT: Project files created with the maven-eclipse-plugin are not supported in M2Eclipse. -->
+		<!-- Evita excluir arquivo "application.properties" do classpath -->
+		<!-- 
+		<resources>
+	         <resource>
+	            <directory>src/main/resources</directory>
+	            <filtering>true</filtering>
+	        </resource>
+	    </resources>
+	    -->
 		<plugins>
 			<!-- Spring Boot Plugin -->
 			<plugin>
@@ -99,8 +124,64 @@
 					</archive>
 				</configuration>
 			</plugin>
+			<!-- Configura Compilador do projeto -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.0</version>
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+					<encoding>${project.build.sourceEncoding}</encoding>
+					<debug>true</debug>
+					<debuglevel>vars,lines,source</debuglevel>
+				</configuration>
+			</plugin>
+			<!-- Eclipse Plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<version>2.10</version>
+				<configuration>
+					<projectNameTemplate>[artifactId]</projectNameTemplate>
+					<wtpmanifest>false</wtpmanifest>
+					<wtpapplicationxml>true</wtpapplicationxml>
+					<wtpversion>2.0</wtpversion>
+					<downloadSources>true</downloadSources>
+          			<downloadJavadocs>true</downloadJavadocs>
+          			<!-- // -->
+					<!-- FIXME: nao consegui remover do classpath as dependencias do M2_REPO -->
+					<!-- http://blog.teamextension.com/m2eclipse-m2e-support-for-maven-eclipse-plugin-projects-497 -->
+		          	<!-- https://dzone.com/articles/migrating-m2eclipse-m2e -->
+					<!-- http://maven.apache.org/plugins/maven-eclipse-plugin/eclipse-mojo.html -->
+					<additionalProjectnatures>
+						<projectnature>org.eclipse.m2e.core.maven2Nature</projectnature>
+					</additionalProjectnatures>
+					<additionalBuildcommands>
+						<buildcommand>org.eclipse.m2e.core.maven2Builder</buildcommand>
+					</additionalBuildcommands>
+					<classpathContainers>
+						<classpathContainer>org.eclipse.jdt.launching.JRE_CONTAINER</classpathContainer>
+						<classpathContainer>org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER</classpathContainer>
+					</classpathContainers>
+					<!-- // -->
+					
+					<additionalProjectFacets>
+						<jst.java>${java.version}</jst.java>
+						<jst.web>2.5</jst.web>
+					</additionalProjectFacets>
+          			<!-- Set Eclipse project to UTF-8 -->
+            		<additionalConfig>
+						<file>
+							<name>.settings/org.eclipse.core.resources.prefs</name>
+							<content>
+								<![CDATA[eclipse.preferences.version=1${line.separator}encoding/<project>=${project.build.sourceEncoding}${line.separator}]]>
+							</content>
+						</file>
+					</additionalConfig>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
-
 
 </project>
